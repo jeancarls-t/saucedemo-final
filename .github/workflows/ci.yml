@@ -22,19 +22,35 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Instalar Firefox
+      # 🔥 INSTALAR EDGE Y SU DRIVER
+      - name: Instalar Microsoft Edge
         run: |
+          curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+          sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+          sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main"
           sudo apt-get update
-          sudo apt-get install -y firefox
-          # Verificar instalación
-          which firefox
-          firefox --version
+          sudo apt-get install -y microsoft-edge-stable
 
-      - name: Instalar Chrome
+      - name: Instalar EdgeDriver
+        run: |
+          # Obtener la versión de Edge instalada
+          EDGE_VERSION=$(microsoft-edge-stable --version | cut -d' ' -f3)
+          echo "Versión de Edge: $EDGE_VERSION"
+          
+          # Descargar el driver correspondiente
+          wget -q "https://msedgedriver.azureedge.net/$EDGE_VERSION/edgedriver_linux64.zip"
+          unzip -q edgedriver_linux64.zip
+          chmod +x msedgedriver
+          sudo mv msedgedriver /usr/local/bin/
+          echo "EdgeDriver instalado: $(msedgedriver --version)"
+
+      # 🔥 OPCIONAL: Instalar Chrome como fallback
+      - name: Instalar Chrome (fallback)
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-          google-chrome --version
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
       - name: Configurar Xvfb
         run: |
@@ -42,10 +58,10 @@ jobs:
           Xvfb :99 -ac &
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      - name: Ejecutar pruebas con Chrome
-        run: mvn clean verify -Dwebdriver.driver=chrome
+      - name: Ejecutar pruebas con Edge
+        run: mvn clean verify -Dwebdriver.driver=edge
         env:
-          CHROME_OPTIONS: --headless --no-sandbox --disable-dev-shm-usage --disable-gpu
+          EDGE_OPTIONS: --headless --no-sandbox --disable-dev-shm-usage
 
       - name: Subir reportes de Serenity
         uses: actions/upload-artifact@v4
@@ -53,3 +69,10 @@ jobs:
         with:
           name: serenity-reports
           path: target/site/serenity/
+
+      - name: Subir reportes de pruebas
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
