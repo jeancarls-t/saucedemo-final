@@ -1,4 +1,4 @@
-name: CI - Serenity Tests
+name: Serenity BDD Tests - CI
 
 on:
   push:
@@ -12,67 +12,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configurar JDK 21
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
 
-      # 🔥 INSTALAR EDGE Y SU DRIVER
-      - name: Instalar Microsoft Edge
-        run: |
-          curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-          sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
-          sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main"
-          sudo apt-get update
-          sudo apt-get install -y microsoft-edge-stable
 
-      - name: Instalar EdgeDriver
-        run: |
-          # Obtener la versión de Edge instalada
-          EDGE_VERSION=$(microsoft-edge-stable --version | cut -d' ' -f3)
-          echo "Versión de Edge: $EDGE_VERSION"
-          
-          # Descargar el driver correspondiente
-          wget -q "https://msedgedriver.azureedge.net/$EDGE_VERSION/edgedriver_linux64.zip"
-          unzip -q edgedriver_linux64.zip
-          chmod +x msedgedriver
-          sudo mv msedgedriver /usr/local/bin/
-          echo "EdgeDriver instalado: $(msedgedriver --version)"
-
-      # 🔥 OPCIONAL: Instalar Chrome como fallback
-      - name: Instalar Chrome (fallback)
+      - name: Setup Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          google-chrome --version
 
-      - name: Configurar Xvfb
+
+      - name: Setup Xvfb
         run: |
           sudo apt-get install -y xvfb
           Xvfb :99 -ac &
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      - name: Ejecutar pruebas con Edge
-        run: mvn clean verify -Dwebdriver.driver=edge
-        env:
-          EDGE_OPTIONS: --headless --no-sandbox --disable-dev-shm-usage
 
-      - name: Subir reportes de Serenity
-        uses: actions/upload-artifact@v4
+      - name: Run Serenity tests
+        run: mvn clean verify -Dwebdriver.driver=chrome
+
+
+      - name: Publish Serenity Report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: serenity-reports
-          path: target/site/serenity/
+          name: serenity-report
+          path: target/site/serenity
+          retention-days: 30
 
-      - name: Subir reportes de pruebas
-        uses: actions/upload-artifact@v4
+
+      - name: Upload Test Reports
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: surefire-reports
           path: target/surefire-reports/
+          retention-days: 30

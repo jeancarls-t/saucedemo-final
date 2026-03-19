@@ -1,5 +1,6 @@
 package com.saucedemo.steps;
-
+import com.saucedemo.helpers.KeyboardHelper;
+import com.saucedemo.helpers.SecurityAlertHelper;
 import com.saucedemo.helpers.BrowserHelper;
 import com.saucedemo.questions.CartQuestions;
 import com.saucedemo.tasks.Login;
@@ -11,9 +12,11 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import io.cucumber.java.es.Dado;
+import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.actors.OnStage;
 import net.serenitybdd.screenplay.actors.OnlineCast;
 import net.serenitybdd.screenplay.actions.Open;
+import net.serenitybdd.screenplay.targets.Target;
 import net.serenitybdd.screenplay.waits.WaitUntil;
 
 import static net.serenitybdd.screenplay.actors.OnStage.theActorCalled;
@@ -22,7 +25,6 @@ import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisi
 
 public class CommonSteps {
 
-    // ✅ ÚNICO MÉTODO @Before que recibe el Scenario
     @Before
     public void beforeScenario(Scenario scenario) {
         System.out.println(">>> ===== INICIO DE ESCENARIO: " + scenario.getName() + " =====");
@@ -49,65 +51,28 @@ public class CommonSteps {
         OnStage.drawTheCurtain();
     }
 
+
     @Dado("que el usuario esta logueado en la tienda")
     public void queElUsuarioEstaLogueado() {
         System.out.println(">>> EJECUTANDO LOGIN COMPLETO <<<");
 
         theActorInTheSpotlight().attemptsTo(
-                Open.url("https://www.saucedemo.com")
-        );
-
-        theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(LoginPage.USERNAME_FIELD, isVisible())
-                        .forNoMoreThan(15).seconds()
-        );
-
-        theActorInTheSpotlight().attemptsTo(
+                Open.url("https://www.saucedemo.com"),
                 Login.withCredentials("standard_user", "secret_sauce")
         );
 
-        // 🔥 INTENTAR MÚLTIPLES SELECTORES
-        boolean carritoEncontrado = false;
-        String[] selectores = {"data-test", "clase", "xpath"};
+        theActorInTheSpotlight().attemptsTo(
+                WaitUntil.the(ProductListPage.CART_ICON, isVisible())
+                        .forNoMoreThan(20).seconds()
+        );
 
-        for (String selector : selectores) {
-            try {
-                switch(selector) {
-                    case "data-test":
-                        theActorInTheSpotlight().attemptsTo(
-                                WaitUntil.the(ProductListPage.CART_ICON, isVisible())
-                                        .forNoMoreThan(10).seconds()
-                        );
-                        break;
-                    case "clase":
-                        theActorInTheSpotlight().attemptsTo(
-                                WaitUntil.the(ProductListPage.CART_ICON_CLASS, isVisible())
-                                        .forNoMoreThan(10).seconds()
-                        );
-                        break;
-                    case "xpath":
-                        theActorInTheSpotlight().attemptsTo(
-                                WaitUntil.the(ProductListPage.CART_ICON_XPATH, isVisible())
-                                        .forNoMoreThan(10).seconds()
-                        );
-                        break;
-                }
-                System.out.println(">>> Ícono del carrito encontrado con selector: " + selector);
-                carritoEncontrado = true;
-                break;
-            } catch (Exception e) {
-                System.out.println(">>> Selector " + selector + " falló, intentando siguiente...");
-            }
-        }
-
-        if (!carritoEncontrado) {
-            throw new AssertionError("No se pudo encontrar el ícono del carrito con ningún selector");
-        }
+        // 🔥 COMENTADOS - Se mantienen por si la nueva estrategia falla
+        // SecurityAlertHelper.handlePossibleSecurityAlert(theActorInTheSpotlight());
+        // KeyboardHelper.pressEscape(theActorInTheSpotlight());
 
         System.out.println(">>> Página de productos cargada correctamente");
     }
 
-    // Método para limpiar el carrito
     private void limpiarCarrito() {
         try {
             System.out.println(">>> LIMPIANDO CARRITO");
@@ -146,5 +111,32 @@ public class CommonSteps {
         );
 
         System.out.println(">>> PAGINA DE LOGIN CARGADA");
+    }
+    private void cerrarVentanaSeguridadSiAparece() {
+        try {
+            // Esperar un par de segundos a que la ventana pueda aparecer
+            Thread.sleep(2000);
+
+            // Buscar el botón "Aceptar" en la ventana de seguridad
+            Target botonAceptar = Target.the("botón aceptar de seguridad")
+                    .locatedBy("//button[contains(text(),'Aceptar')]");
+
+            // Verificar si el botón está visible
+            if (botonAceptar.resolveFor(theActorInTheSpotlight()).isVisible()) {
+                System.out.println(">>> Ventana de seguridad detectada, cerrando...");
+                theActorInTheSpotlight().attemptsTo(
+                        Click.on(botonAceptar)
+                );
+                System.out.println(">>> Ventana de seguridad cerrada");
+
+                // Pequeña pausa después de cerrar
+                Thread.sleep(1000);
+            } else {
+                System.out.println(">>> No hay ventana de seguridad visible");
+            }
+        } catch (Exception e) {
+            // Si no hay ventana o hay error, simplemente continuamos
+            System.out.println(">>> No se detectó ventana de seguridad o no se pudo cerrar");
+        }
     }
 }
