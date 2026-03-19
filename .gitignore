@@ -1,0 +1,24 @@
+# Archivos compilados
+*.class
+
+# Carpeta target de Maven
+target/
+**/target/
+
+# Reportes de Serenity
+target/site/serenity/
+**/target/site/serenity/
+
+# Archivos de logs
+*.log
+
+# Archivos del IDE
+.idea/
+*.iml
+.settings/
+.classpath
+.project
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
