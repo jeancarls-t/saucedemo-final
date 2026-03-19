@@ -21,28 +21,31 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-      
-      - name: Instalar Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
 
       - name: Instalar Firefox
         run: |
           sudo apt-get update
           sudo apt-get install -y firefox
+          # Verificar instalación
+          which firefox
+          firefox --version
 
-      - name: Configurar Xvfb (display virtual)
+      - name: Instalar Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
+      - name: Configurar Xvfb
         run: |
           sudo apt-get install -y xvfb
           Xvfb :99 -ac &
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      - name: Ejecutar pruebas con Maven
-        run: mvn clean verify
+      - name: Ejecutar pruebas con Chrome
+        run: mvn clean verify -Dwebdriver.driver=chrome
         env:
-          CHROME_OPTIONS: --headless --no-sandbox --disable-dev-shm-usage
-          FIREFOX_OPTIONS: --headless
+          CHROME_OPTIONS: --headless --no-sandbox --disable-dev-shm-usage --disable-gpu
 
       - name: Subir reportes de Serenity
         uses: actions/upload-artifact@v4
@@ -50,10 +53,3 @@ jobs:
         with:
           name: serenity-reports
           path: target/site/serenity/
-
-      - name: Subir reportes de pruebas
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: surefire-reports
-          path: target/surefire-reports/
