@@ -66,12 +66,45 @@ public class CommonSteps {
                 Login.withCredentials("standard_user", "secret_sauce")
         );
 
-        theActorInTheSpotlight().attemptsTo(
-                WaitUntil.the(ProductListPage.CART_ICON, isVisible())
-                        .forNoMoreThan(20).seconds()
-        );
+        // 🔥 INTENTAR MÚLTIPLES SELECTORES
+        boolean carritoEncontrado = false;
+        String[] selectores = {"data-test", "clase", "xpath"};
 
-        System.out.println(">>> LOGIN EXITOSO");
+        for (String selector : selectores) {
+            try {
+                switch(selector) {
+                    case "data-test":
+                        theActorInTheSpotlight().attemptsTo(
+                                WaitUntil.the(ProductListPage.CART_ICON, isVisible())
+                                        .forNoMoreThan(10).seconds()
+                        );
+                        break;
+                    case "clase":
+                        theActorInTheSpotlight().attemptsTo(
+                                WaitUntil.the(ProductListPage.CART_ICON_CLASS, isVisible())
+                                        .forNoMoreThan(10).seconds()
+                        );
+                        break;
+                    case "xpath":
+                        theActorInTheSpotlight().attemptsTo(
+                                WaitUntil.the(ProductListPage.CART_ICON_XPATH, isVisible())
+                                        .forNoMoreThan(10).seconds()
+                        );
+                        break;
+                }
+                System.out.println(">>> Ícono del carrito encontrado con selector: " + selector);
+                carritoEncontrado = true;
+                break;
+            } catch (Exception e) {
+                System.out.println(">>> Selector " + selector + " falló, intentando siguiente...");
+            }
+        }
+
+        if (!carritoEncontrado) {
+            throw new AssertionError("No se pudo encontrar el ícono del carrito con ningún selector");
+        }
+
+        System.out.println(">>> Página de productos cargada correctamente");
     }
 
     // Método para limpiar el carrito
