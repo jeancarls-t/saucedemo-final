@@ -1,4 +1,4 @@
-name: Serenity BDD Tests - CI
+name: CI - Serenity Tests (Firefox)
 
 on:
   push:
@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Configurar JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -23,37 +23,45 @@ jobs:
           cache: maven
 
 
-      - name: Setup Chrome
+      - name: Instalar Firefox
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          google-chrome --version
+          sudo apt-get install -y firefox
+          firefox --version
+      
 
+      - name: Instalar GeckoDriver
+        run: |
+          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux64.tar.gz
+          tar -xzf geckodriver-v0.35.0-linux64.tar.gz
+          chmod +x geckodriver
+          sudo mv geckodriver /usr/local/bin/
+          geckodriver --version
+      
 
-      - name: Setup Xvfb
+      - name: Configurar Xvfb
         run: |
           sudo apt-get install -y xvfb
           Xvfb :99 -ac &
           echo "DISPLAY=:99" >> $GITHUB_ENV
+      
+
+      - name: Ejecutar pruebas con Firefox
+        run: mvn clean verify -Dwebdriver.driver=firefox
+        env:
+          MOZ_HEADLESS: 1
 
 
-      - name: Run Serenity tests
-        run: mvn clean verify -Dwebdriver.driver=chrome
-
-
-      - name: Publish Serenity Report
-        if: always()
+      - name: Subir reportes de Serenity
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: serenity-report
-          path: target/site/serenity
-          retention-days: 30
+          name: serenity-reports
+          path: target/site/serenity/
 
-
-      - name: Upload Test Reports
-        if: always()
+      - name: Subir reportes de pruebas
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: surefire-reports
           path: target/surefire-reports/
-          retention-days: 30

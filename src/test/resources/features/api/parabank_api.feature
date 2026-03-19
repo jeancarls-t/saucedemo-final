@@ -10,7 +10,7 @@ Feature: Parabank API Tests
   @api-smoke
   Scenario: Verificar que el servicio de cuentas está disponible
     When el usuario hace una peticion GET a "/services/bank/accounts/12345"
-    Then la respuesta debe tener codigo 400
+    Then la respuesta debe tener codigo 200
     #200
 
   @api-positive
