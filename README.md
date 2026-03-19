@@ -37,7 +37,7 @@ Test automation framework for [SauceDemo](https://www.saucedemo.com) and [Paraba
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/serenity-final.git
+git clone [https://github.com/jeancarls-t/saucedemo-final](https://github.com/jeancarls-t/saucedemo-final)
 cd serenity-final
 ```
 
@@ -178,4 +178,6 @@ The project includes a CI pipeline that:
 This project is part of a technical assessment.
 
 ## ✨ Author
-Your Name - [GitHub profile link]
+**Jean Caro**  
+GitHub: [@jeancarls-t](https://github.com/jeancarls-t)  
+Email: jeancarlst28@gmail.com
