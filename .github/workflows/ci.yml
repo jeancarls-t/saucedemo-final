@@ -1,4 +1,4 @@
-name: CI - Serenity Tests (Firefox)
+name: CI - Serenity Tests
 
 on:
   push:
@@ -22,14 +22,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-
+      # ✅ Instalar Firefox (viene preinstalado, pero lo aseguramos)
       - name: Instalar Firefox
         run: |
           sudo apt-get update
           sudo apt-get install -y firefox
           firefox --version
-      
 
+      # ✅ Configurar GeckoDriver
       - name: Instalar GeckoDriver
         run: |
           wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux64.tar.gz
@@ -37,21 +37,21 @@ jobs:
           chmod +x geckodriver
           sudo mv geckodriver /usr/local/bin/
           geckodriver --version
-      
 
+      # ✅ Configurar Xvfb (pantalla virtual)
       - name: Configurar Xvfb
         run: |
           sudo apt-get install -y xvfb
           Xvfb :99 -ac &
           echo "DISPLAY=:99" >> $GITHUB_ENV
-      
 
+      # ✅ Ejecutar pruebas con Firefox (modo headless)
       - name: Ejecutar pruebas con Firefox
-        run: mvn clean verify -Dwebdriver.driver=firefox
+        run: mvn clean verify -Dwebdriver.driver=firefox -Dfirefox.options.args=--headless
         env:
           MOZ_HEADLESS: 1
 
-
+      # ✅ Subir reportes
       - name: Subir reportes de Serenity
         uses: actions/upload-artifact@v4
         if: always()
