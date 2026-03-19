@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # Permite ejecución manual
+  workflow_dispatch:
 
 jobs:
   test:
@@ -21,18 +21,37 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+      
+      - name: Instalar Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Instalar Firefox
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox
+
+      - name: Configurar Xvfb (display virtual)
+        run: |
+          sudo apt-get install -y xvfb
+          Xvfb :99 -ac &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Ejecutar pruebas con Maven
         run: mvn clean verify
+        env:
+          CHROME_OPTIONS: --headless --no-sandbox --disable-dev-shm-usage
+          FIREFOX_OPTIONS: --headless
 
-      - name: Subir reportes de Serenity como artefacto
+      - name: Subir reportes de Serenity
         uses: actions/upload-artifact@v4
-        if: always() # Se ejecutador
+        if: always()
         with:
           name: serenity-reports
           path: target/site/serenity/
 
-      - name: Subir reportes de pruebas como artefacto
+      - name: Subir reportes de pruebas
         uses: actions/upload-artifact@v4
         if: always()
         with:
