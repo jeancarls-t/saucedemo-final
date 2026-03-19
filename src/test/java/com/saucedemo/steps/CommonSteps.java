@@ -28,17 +28,11 @@ public class CommonSteps {
     @Before
     public void beforeScenario(Scenario scenario) {
         System.out.println(">>> ===== INICIO DE ESCENARIO: " + scenario.getName() + " =====");
-
-        // 1. Inicializar el escenario SIEMPRE
         OnStage.setTheStage(new OnlineCast());
         theActorCalled("Usuario");
-
-        // 2. Hacer login SOLO si NO es escenario de login
         if (!scenario.getSourceTagNames().contains("@login")) {
             queElUsuarioEstaLogueado();
         }
-
-        // 3. Limpiar carrito SOLO para escenarios de carrito o checkout
         if (scenario.getSourceTagNames().contains("@cart") ||
                 scenario.getSourceTagNames().contains("@checkout")) {
             limpiarCarrito();
@@ -66,7 +60,6 @@ public class CommonSteps {
                         .forNoMoreThan(20).seconds()
         );
 
-        // 🔥 COMENTADOS - Se mantienen por si la nueva estrategia falla
         // SecurityAlertHelper.handlePossibleSecurityAlert(theActorInTheSpotlight());
         // KeyboardHelper.pressEscape(theActorInTheSpotlight());
 
@@ -114,14 +107,9 @@ public class CommonSteps {
     }
     private void cerrarVentanaSeguridadSiAparece() {
         try {
-            // Esperar un par de segundos a que la ventana pueda aparecer
             Thread.sleep(2000);
-
-            // Buscar el botón "Aceptar" en la ventana de seguridad
             Target botonAceptar = Target.the("botón aceptar de seguridad")
                     .locatedBy("//button[contains(text(),'Aceptar')]");
-
-            // Verificar si el botón está visible
             if (botonAceptar.resolveFor(theActorInTheSpotlight()).isVisible()) {
                 System.out.println(">>> Ventana de seguridad detectada, cerrando...");
                 theActorInTheSpotlight().attemptsTo(
@@ -129,13 +117,11 @@ public class CommonSteps {
                 );
                 System.out.println(">>> Ventana de seguridad cerrada");
 
-                // Pequeña pausa después de cerrar
                 Thread.sleep(1000);
             } else {
                 System.out.println(">>> No hay ventana de seguridad visible");
             }
         } catch (Exception e) {
-            // Si no hay ventana o hay error, simplemente continuamos
             System.out.println(">>> No se detectó ventana de seguridad o no se pudo cerrar");
         }
     }

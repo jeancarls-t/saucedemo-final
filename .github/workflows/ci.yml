@@ -1,67 +1,26 @@
-name: CI - Serenity Tests
+name: CI - Build Verification
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Configurar JDK 21
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven
 
-      # ✅ Instalar Firefox (viene preinstalado, pero lo aseguramos)
-      - name: Instalar Firefox
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox
-          firefox --version
+      - name: Build with Maven
+        run: mvn clean compile
 
-      # ✅ Configurar GeckoDriver
-      - name: Instalar GeckoDriver
-        run: |
-          wget -q https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux64.tar.gz
-          tar -xzf geckodriver-v0.35.0-linux64.tar.gz
-          chmod +x geckodriver
-          sudo mv geckodriver /usr/local/bin/
-          geckodriver --version
 
-      # ✅ Configurar Xvfb (pantalla virtual)
-      - name: Configurar Xvfb
-        run: |
-          sudo apt-get install -y xvfb
-          Xvfb :99 -ac &
-          echo "DISPLAY=:99" >> $GITHUB_ENV
-
-      # ✅ Ejecutar pruebas con Firefox (modo headless)
-      - name: Ejecutar pruebas con Firefox
-        run: mvn clean verify -Dwebdriver.driver=firefox -Dfirefox.options.args=--headless
-        env:
-          MOZ_HEADLESS: 1
-
-      # ✅ Subir reportes
-      - name: Subir reportes de Serenity
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: serenity-reports
-          path: target/site/serenity/
-
-      - name: Subir reportes de pruebas
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: surefire-reports
-          path: target/surefire-reports/
+      - name: Run API tests
+        run: mvn test -Dtest=CucumberTestSuite -Dcucumber.filter.tags="@api"

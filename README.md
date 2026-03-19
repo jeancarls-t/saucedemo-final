@@ -1,183 +1,172 @@
 # SauceDemo Automation Framework - Final Version
 
 ## 📋 Description
-Test automation framework for [SauceDemo](https://www.saucedemo.com) and [Parabank API](https://parabank.parasoft.com) using:
-- **Java 21**
-- **Serenity BDD 4.2.34** with Screenplay pattern
-- **Cucumber 7.21.1** for BDD
-- **JUnit 4** for test runner (stable with Serenity)
-- **JUnit 5** for additional support
-- **Maven** for dependency management
-- **Rest Assured** for API testing
+Professional test automation framework built for the technical assessment, covering:
+- **UI Testing**: [SauceDemo](https://www.saucedemo.com) e-commerce platform
+- **API Testing**: [Parabank](https://parabank.parasoft.com) banking API
 
-## 🎯 Implemented Test Cases (14 scenarios)
+### 🎯 Key Features
+- ✅ 14 automated test cases (UI + API)
+- ✅ Screenplay pattern implementation
+- ✅ BDD with Cucumber (Gherkin)
+- ✅ Parallel execution ready
+- ✅ CI/CD with GitHub Actions
+- ✅ Detailed Serenity reports
 
-### UI Tests (SauceDemo)
-| Feature | Scenarios | Tags |
-|---------|-----------|------|
-| Login | 3 (2 negative) | `@login` |
-| Shopping Cart | 4 | `@cart` |
-| Checkout | 2 (1 negative) | `@checkout` |
+## 🛠️ Technology Stack Justification
 
-### API Tests (Parabank)
-| Scenario | Method | Expected Code | Tags |
-|----------|--------|---------------|------|
-| Available account | GET | 200 | `@api` |
-| Customer accounts list | GET | 200 | `@api` |
-| Failed transfer (insufficient funds) | POST | 400 | `@api` |
-| Non-existent account | GET | 400 | `@api` |
+| Technology | Version | Justification |
+|------------|---------|---------------|
+| **Java 21** | 21 LTS | Long-term support, mature ecosystem, team alignment |
+| **Serenity BDD** | 4.2.34 | Living documentation, Screenplay pattern, multi-layer testing |
+| **Cucumber** | 7.21.1 | Business-readable tests, BDD approach, stakeholder collaboration |
+| **JUnit 4** | 4.13.2 | Stable runner for Serenity + Cucumber integration |
+| **Rest Assured** | 5.5.0 | Domain-specific language for API testing, seamless Serenity integration |
+| **Maven** | 3.9+ | Dependency management, build lifecycle standardization |
+| **GitHub Actions** | - | Native CI/CD integration, artifact management |
 
-## 🚀 Prerequisites
-- Java JDK 21
-- Maven 3.9+
-- Git
-- Chrome or Firefox browser
+## 🎯 Test Coverage (14 Scenarios)
 
-## 🔧 Installation and Setup
+### UI Tests (SauceDemo) - 10 Scenarios
+| Feature | Scenarios | Coverage | Tags |
+|---------|-----------|----------|------|
+| **Login** | 3 (2 negative) | Happy path + locked user + invalid credentials | `@login` |
+| **Shopping Cart** | 4 | Add single/multiple items, remove items, verify details | `@cart` |
+| **Checkout** | 2 (1 negative) | Complete purchase, missing information | `@checkout` |
+| **Cart Badge** | 1 | Visual verification | `@cart` |
 
-### 1. Clone the repository
+### API Tests (Parabank) - 4 Scenarios
+| Scenario | Method | Expected | Business Value |
+|----------|--------|----------|----------------|
+| Account availability | GET | 200 | Core service health check |
+| Customer accounts | GET | 200 | Data retrieval validation |
+| Failed transfer | POST | 400 | Business rule (insufficient funds) |
+| Non-existent account | GET | 400 | Error handling validation |
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Java JDK 21 ([Download](https://adoptium.net/))
+- Maven 3.9+ ([Download](https://maven.apache.org/))
+- Git ([Download](https://git-scm.com/))
+- Firefox browser (recommended for local execution)
+
+### Installation
 ```bash
-git clone [https://github.com/jeancarls-t/saucedemo-final](https://github.com/jeancarls-t/saucedemo-final)
-cd serenity-final
-```
+# Clone repository
+git clone https://github.com/jeancarls-t/saucedemo-final.git
+cd saucedemo-final
 
-### 2. Run all tests
-```bash
+# Run all tests
 mvn clean verify
+
+# Run specific test groups
+mvn clean verify -Dcucumber.filter.tags="@smoke"     # Critical flows only
+mvn clean verify -Dcucumber.filter.tags="@api"       # API tests only
+mvn clean verify -Dcucumber.filter.tags="not @api"   # UI tests only
 ```
 
-### 3. Run specific tests by tag
-```bash
-# UI tests only
-mvn clean verify -Dcucumber.filter.tags="not @api"
+## 📊 Test Reports
 
-# API tests only
-mvn clean verify -Dcucumber.filter.tags="@api"
-
-# Cart tests only
-mvn clean verify -Dcucumber.filter.tags="@cart"
-
-# Login tests only
-mvn clean verify -Dcucumber.filter.tags="@login"
-```
-
-## 📊 Reports
-
-Reports are generated at:
+After execution, reports are available at:
 - **Serenity Report**: `target/site/serenity/index.html`
 - **Cucumber Report**: `target/cucumber-html-report.html`
-- **Surefire Report**: `target/site/surefire-report.html`
+- **Surefire Report**: `target/surefire-reports/`
 
-To view reports after execution:
 ```bash
-# On Windows
+# Open Serenity report (Windows)
 Start-Process "target/site/serenity/index.html"
 
-# On Linux/Mac
+# Open Serenity report (Linux/Mac)
 open target/site/serenity/index.html
 ```
 
-## 🏗️ Project Structure
+## 🏗️ Architecture Overview
 
 ```
-src/
-├── test/
-│   ├── java/
-│   │   └── com/
-│   │       └── saucedemo/
-│   │           ├── runners/
-│   │           │   └── CucumberTestSuite.java
-│   │           ├── steps/
-│   │           │   ├── CommonSteps.java
-│   │           │   ├── LoginSteps.java
-│   │           │   ├── CartSteps.java
-│   │           │   ├── CheckoutSteps.java
-│   │           │   └── api/
-│   │           │       └── ParabankApiSteps.java
-│   │           ├── tasks/
-│   │           │   ├── Login.java
-│   │           │   ├── AddToCart.java
-│   │           │   ├── RemoveFromCart.java
-│   │           │   ├── NavigateToCart.java
-│   │           │   └── Checkout.java
-│   │           ├── questions/
-│   │           │   ├── LoginQuestions.java
-│   │           │   ├── CartQuestions.java
-│   │           │   └── CheckoutQuestions.java
-│   │           ├── user_interfaces/
-│   │           │   ├── LoginPage.java
-│   │           │   ├── ProductListPage.java
-│   │           │   ├── CartPage.java
-│   │           │   └── CheckoutPage.java
-│   │           └── helpers/
-│   │               └── BrowserHelper.java
-│   └── resources/
-│       ├── features/
-│       │   ├── login.feature
-│       │   ├── shopping_cart.feature
-│       │   ├── checkout.feature
-│       │   └── api/
-│       │       └── parabank_api.feature
-│       └── junit-platform.properties
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-├── serenity.properties
-├── pom.xml
-└── README.md
+src/test/java/com/saucedemo/
+├── runners/          # Test execution configuration
+├── steps/            # Cucumber step definitions
+├── tasks/            # Screenplay actions (Login, AddToCart, etc.)
+├── questions/        # Screenplay verifications
+├── user_interfaces/  # Page Objects / UI mappings
+└── helpers/          # Utility classes (BrowserHelper)
+
+src/test/resources/
+├── features/         # Gherkin feature files
+└── junit-platform.properties
 ```
 
-## 🛠️ Technology Stack
+## 🔄 CI/CD Pipeline
 
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Java | 21 | Programming language |
-| Serenity BDD | 4.2.34 | Automation framework |
-| Cucumber | 7.21.1 | BDD and Gherkin |
-| **JUnit 4** | 4.13.2 | **Test runner** (stable with Serenity) |
-| JUnit 5 | 5.11.4 | Additional support |
-| Rest Assured | 5.5.0 | API testing |
-| Maven | 3.9+ | Dependency management |
-| GitHub Actions | - | Continuous Integration |
+### GitHub Actions Workflow
+```yaml
+Triggers: push, pull_request, manual dispatch
+Environment: ubuntu-latest
+Java: 21 (Temurin)
+Steps:
+  - Code checkout
+  - Maven build & test
+  - Report generation
+  - Artifact storage
+```
 
-## 🔄 CI/CD with GitHub Actions
+**Note**: Due to browser driver limitations in headless environments, the CI pipeline focuses on:
+- ✅ Build verification (compilation)
+- ✅ API tests execution
+- ℹ️ UI tests run locally (see execution instructions)
 
-The project includes a CI pipeline that:
-- Runs on every `push` and `pull_request`
-- Executes all tests on Ubuntu with Java 21
-- Generates and stores reports as artifacts
+## 📈 Design Patterns & Best Practices
 
-## 📈 Screenplay Pattern Implementation
+### Screenplay Pattern
+- **Tasks**: Encapsulate user actions (e.g., `Login.withCredentials()`)
+- **Questions**: Perform verifications (e.g., `CartQuestions.itemCount()`)
+- **Page Objects**: Centralize UI element definitions
 
-- **Tasks**: User actions (Login, AddToCart, Checkout)
-- **Questions**: Verifications (itemCount, priceOf, errorMessage)
-- **Page Objects**: UI elements (LoginPage, CartPage)
-- **Actors**: Users performing the tasks
+### SOLID Principles Applied
+- **Single Responsibility**: Each class has one clear purpose
+- **Open/Closed**: New test cases don't require modifying existing code
+- **Interface Segregation**: Focused, minimal interfaces
 
-## 📝 Test Strategy
+## 🔍 Troubleshooting
 
-### Why this stack:
-- **Serenity BDD**: Detailed reports and traceability
-- **Screenplay**: Maintainable and readable code
-- **Cucumber**: Collaboration with non-technical stakeholders
-- **JUnit 4**: Stable runner for Serenity + Cucumber
+### Common Issues
 
-### Test Pyramid distribution:
-- **Unit**: N/A (framework level)
-- **Integration**: 30% (API tests)
-- **E2E**: 70% (UI tests)
+| Issue | Solution |
+|-------|----------|
+| Chrome security alert | Use Firefox locally (recommended) |
+| Tests fail in CI | Verify browser drivers or run API tests only |
+| Port conflicts | Change port in `serenity.properties` |
+| Slow execution | Increase timeouts in configuration |
 
-## 🤝 Contributing
+![img_3.png](img_3.png)
+![img_4.png](img_4.png)
 
-1. Follow Screenplay pattern
-2. Keep features in readable Gherkin
-3. Run tests locally before PR
-4. Ensure coverage of positive and negative cases
+## 📚 Additional Documentation
+
+- **Strategy Document**: [`ESTRATEGIA.md`](ESTRATEGIA.md) (English/Spanish)
+- **CI/CD Configuration**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+- **Serenity Reports**: Generated after each run
+
+## 🤝 Contributing Guidelines
+
+1. Follow Screenplay pattern conventions
+2. Write feature files in clear Gherkin
+3. Run tests locally before submitting PR
+4. Include both positive and negative scenarios
+5. Update documentation when adding features
 
 ## 📄 License
-This project is part of a technical assessment.
+
+This project is created for a technical assessment. All rights reserved.
 
 ## ✨ Author
-**Jean Caro**  
-GitHub: [@jeancarls-t](https://github.com/jeancarls-t)  
-Email: jeancarlst28@gmail.com
+
+**Jean Caro**
+- GitHub: [@jeancarls-t](https://github.com/jeancarls-t)
+- Email: jeancarlst28@gmail.com
+- Role: Test Automation Engineer
+
+---
+
+*Last Updated: March 19, 2026*
