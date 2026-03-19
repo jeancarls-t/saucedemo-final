@@ -67,6 +67,9 @@ public class ParabankApiSteps {
                 .param("toAccountId", toAccount)
                 .param("amount", amount)
                 .post(fullUrl);
+
+        int codigo = SerenityRest.then().extract().statusCode();
+        System.out.println(">>> CÓDIGO DE RESPUESTA DE TRANSFERENCIA: " + codigo);
     }
 
     @Dado("el usuario consulta la cuenta con ID {string}")
